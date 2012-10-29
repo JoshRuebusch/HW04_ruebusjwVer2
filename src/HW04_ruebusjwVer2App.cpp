@@ -94,8 +94,28 @@ void HW04_ruebusjwVer2App::setup()
 		}
 		}
 		else{}
-		
 	}	
+	arrLen = counter+1;
+
+	//shuffle algorithm
+	int j = 0;
+	for( int i = 0; i < arrLen-1; i++)
+	{
+		Entry temp = e[i];
+		j = (rand() % (arrLen-1));
+		while(i==j)
+		{
+			j = (rand() % (arrLen-1));
+		}
+		e[i] = e[j];
+		e[j] = temp;
+		
+		//console() << e[i].identifier << std::endl;
+	}
+	//end shuffle
+
+	ruebusjwStarbucks rs;
+	rs.build(e,arrLen);
 }
 
 void HW04_ruebusjwVer2App::mouseDown( MouseEvent event )

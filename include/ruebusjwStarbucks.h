@@ -14,7 +14,7 @@ class node{
 public:		
 
 	node();
-	node(Entry e);
+	node(Entry* e);
 
 	node* left_;
 	node* right_;
@@ -37,4 +37,5 @@ public:
 
 	Entry* getNearest(double x, double y);
 	node* insert(Entry* e, node* r, bool isXlevel);
+	Entry* search(double keyX_, double keyY_, node* r, bool isXLevel);
 };
