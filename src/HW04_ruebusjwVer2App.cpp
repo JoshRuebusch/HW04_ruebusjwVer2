@@ -30,8 +30,10 @@ class HW04_ruebusjwVer2App : public AppBasic {
 	void update();
 	void draw();
 	Entry* e;
+	Entry* closestStar;
 	int arrLen;
 	bool growCalled;
+	node* root;
 
 };
 
@@ -116,6 +118,8 @@ void HW04_ruebusjwVer2App::setup()
 
 	ruebusjwStarbucks rs;
 	rs.build(e,arrLen);
+	closestStar = rs.getNearest(.2, .6);
+	console() <<"Your closest Starbucks is at: " << closestStar->identifier << std::endl;
 }
 
 void HW04_ruebusjwVer2App::mouseDown( MouseEvent event )

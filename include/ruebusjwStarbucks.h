@@ -14,7 +14,7 @@ class node{
 public:		
 
 	node();
-	node(Entry* e);
+	node(Entry e);
 
 	node* left_;
 	node* right_;
@@ -29,13 +29,16 @@ public:
 	string fileName;
 	Entry* closestStarbucks;
 
+	Entry* theArray;
+
 	node* newNode;
 
 	ruebusjwStarbucks();
 	void build(Entry* c, int n);
 	//void createArray(string file, Entry* c, int n);
+	//node* r;
 
 	Entry* getNearest(double x, double y);
-	node* insert(Entry* e, node* r, bool isXlevel);
-	Entry* search(double keyX_, double keyY_, node* r, bool isXLevel);
+	//node* insert(Entry* e, node* r, bool isXlevel);
+	//Entry* search(double keyX_, double keyY_, node* r, bool isXLevel);
 };
