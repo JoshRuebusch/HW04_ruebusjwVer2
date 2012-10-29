@@ -33,7 +33,7 @@ public:
 
 	ruebusjwStarbucks();
 	void build(Entry* c, int n);
-	void createArray(string file, Entry* c, int n);
+	//void createArray(string file, Entry* c, int n);
 
 	Entry* getNearest(double x, double y);
 	node* insert(Entry* e, node* r, bool isXlevel);
