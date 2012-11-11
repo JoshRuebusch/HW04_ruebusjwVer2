@@ -8,7 +8,6 @@
 #include "cinder/ImageIo.h"
 #include "cinder/app/KeyEvent.h"
 #include "cinder/Text.h"
-
 #include "ruebusjwStarbucks.h"
 
 #include <iostream>
@@ -29,11 +28,16 @@ class HW04_ruebusjwVer2App : public AppBasic {
 	void mouseDown( MouseEvent event );	
 	void update();
 	void draw();
+	void shapeDrawer(float x_, float y_, int red, int green, int blue);
 	Entry* e;
 	Entry* closestStar;
 	int arrLen;
 	bool growCalled;
 	node* root;
+private:
+	gl::Texture myImage;
+	//void shapeDrawer(float x_, float y_, int red, int green, int blue);
+	
 
 };
 
@@ -49,6 +53,8 @@ Entry* grow(Entry* smallArray, int arrayLen){
 
 void HW04_ruebusjwVer2App::setup()
 {
+	myImage = gl::Texture( loadImage( loadAsset( "USA01.PNG" ) ) );
+	
 	growCalled = false;
 	arrLen = 3000;
 	int counter = 0;
@@ -118,8 +124,17 @@ void HW04_ruebusjwVer2App::setup()
 
 	ruebusjwStarbucks rs;
 	rs.build(e,arrLen);
-	closestStar = rs.getNearest(.2, .6);
-	console() <<"Your closest Starbucks is at: " << closestStar->identifier << std::endl;
+	//closestStar = rs.getNearest(.2, .6);
+	//console() <<"Your closest Starbucks is at: " << closestStar->identifier << std::endl;
+}
+
+void HW04_ruebusjwVer2App::shapeDrawer(float x_, float y_, int red, int green, int blue)
+{
+	gl::color(Color8u(0,0,0));
+	gl::drawSolidCircle( Vec2f( 800*x_, 600*(1-y_) ), 5.0f );
+	gl::color(Color8u(red, green, blue));
+	gl::drawSolidCircle( Vec2f( 800*x_, 600*(1-y_) ), 4.0f );
+	gl::color(1,1,1,-1);
 }
 
 void HW04_ruebusjwVer2App::mouseDown( MouseEvent event )
@@ -128,12 +143,19 @@ void HW04_ruebusjwVer2App::mouseDown( MouseEvent event )
 
 void HW04_ruebusjwVer2App::update()
 {
+	
+
 }
 
 void HW04_ruebusjwVer2App::draw()
 {
+	gl::draw( myImage, getWindowBounds() );
+	for(int i = 0; i<arrLen; i++)
+	{
+		shapeDrawer(e[i].x,e[i].y,255,0,0);
+	}
 	// clear out the window with black
-	gl::clear( Color( 1, 1, 1 ) ); 
+	//gl::clear( Color( 1, 1, 1 ) ); 
 }
 
 CINDER_APP_BASIC( HW04_ruebusjwVer2App, RendererGl )
