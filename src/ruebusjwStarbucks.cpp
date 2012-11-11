@@ -60,7 +60,7 @@ Entry* ruebusjwStarbucks::getNearest(double x_, double y_){
 	}
 	for(int i = 0; i < arraySize - 1; i++){
 		curDist = sqrt((x_-theArray[i].x)*(x_-theArray[i].x)+(y_-theArray[i].y)*(y_-theArray[i].y));
-		if(curDist = smallestDist)
+		if(curDist == smallestDist)
 			curPosition = &theArray[i];
 	}
 

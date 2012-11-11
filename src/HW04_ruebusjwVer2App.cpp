@@ -28,18 +28,32 @@ class HW04_ruebusjwVer2App : public AppBasic {
 	void mouseDown( MouseEvent event );	
 	void update();
 	void draw();
-	void shapeDrawer(float x_, float y_, int red, int green, int blue);
+	void shapeDrawer(float x_, float y_, int red, int green, int blue, bool isLookingForClosest);
+	void prepareSettings(Settings* settings);
 	Entry* e;
 	Entry* closestStar;
 	int arrLen;
 	bool growCalled;
+	bool isLookingForClosest_;
 	node* root;
+	static const int appWidth = 800;
+	static const int appHeight = 600;
 private:
 	gl::Texture myImage;
+	ruebusjwStarbucks rs;
+	int skippedBucks;
+	int frameNumber;
+	double xPos;
+	double yPos;
 	//void shapeDrawer(float x_, float y_, int red, int green, int blue);
 	
 
 };
+
+void HW04_ruebusjwVer2App::prepareSettings(Settings* settings){
+	settings->setWindowSize(appWidth,appHeight);
+	settings->setResizable(false);
+}
 
 Entry* grow(Entry* smallArray, int arrayLen){
 	Entry* newArray = new Entry[arrayLen*2];
@@ -54,10 +68,15 @@ Entry* grow(Entry* smallArray, int arrayLen){
 void HW04_ruebusjwVer2App::setup()
 {
 	myImage = gl::Texture( loadImage( loadAsset( "USA01.PNG" ) ) );
+	isLookingForClosest_ = false;
+
+	xPos = -1;
+	yPos = -1;
 	
 	growCalled = false;
 	arrLen = 3000;
 	int counter = 0;
+	frameNumber = 0;
 	e = new Entry[arrLen];
 	ifstream in("../resources/Starbucks_2006.csv");
 
@@ -122,23 +141,44 @@ void HW04_ruebusjwVer2App::setup()
 	}
 	//end shuffle
 
-	ruebusjwStarbucks rs;
+	
 	rs.build(e,arrLen);
 	//closestStar = rs.getNearest(.2, .6);
 	//console() <<"Your closest Starbucks is at: " << closestStar->identifier << std::endl;
 }
 
-void HW04_ruebusjwVer2App::shapeDrawer(float x_, float y_, int red, int green, int blue)
+void HW04_ruebusjwVer2App::shapeDrawer(float x_, float y_, int red, int green, int blue, bool isLookingForClosest)
 {
-	gl::color(Color8u(0,0,0));
-	gl::drawSolidCircle( Vec2f( 800*x_, 600*(1-y_) ), 5.0f );
-	gl::color(Color8u(red, green, blue));
-	gl::drawSolidCircle( Vec2f( 800*x_, 600*(1-y_) ), 4.0f );
-	gl::color(1,1,1,-1);
+	if(isLookingForClosest)
+	{
+		gl::color(Color8u(0,0,0));
+		gl::drawSolidCircle( Vec2f( 800*x_, 600*(1-y_) ), 4.0f );
+		gl::color(Color8u(0, 255, 255));
+		gl::drawSolidCircle( Vec2f( 800*x_, 600*(1-y_) ), 3.0f );
+		gl::color(1,1,1,-1);
+		isLookingForClosest_ = false;
+	}
+	else
+	{
+		gl::color(Color8u(0,0,0));
+		gl::drawSolidCircle( Vec2f( 800*x_, 600*(1-y_) ), 3.0f );
+		gl::color(Color8u(red, green, blue));
+		gl::drawSolidCircle( Vec2f( 800*x_, 600*(1-y_) ), 2.0f );
+		gl::color(1,1,1,-1);
+	}
 }
 
 void HW04_ruebusjwVer2App::mouseDown( MouseEvent event )
 {
+	skippedBucks = -1;
+	xPos = event.getPos().x;
+	yPos = event.getPos().y;
+	Entry* nearestStarbucks = rs.getNearest(xPos/appWidth,1-(yPos/appHeight));
+	for(int i = 0; i < arrLen;i++)
+	{
+		if(e[i].identifier==nearestStarbucks->identifier)
+			skippedBucks = i;
+	}
 }
 
 void HW04_ruebusjwVer2App::update()
@@ -149,13 +189,19 @@ void HW04_ruebusjwVer2App::update()
 
 void HW04_ruebusjwVer2App::draw()
 {
-	gl::draw( myImage, getWindowBounds() );
+	if(frameNumber == 0)
+	{
+		gl::draw( myImage, getWindowBounds() );
+	}
 	for(int i = 0; i<arrLen; i++)
 	{
-		shapeDrawer(e[i].x,e[i].y,255,0,0);
+		if(i==skippedBucks)
+		{
+			isLookingForClosest_ = true;
+		}
+
+		shapeDrawer(e[i].x,e[i].y,255,0,0,isLookingForClosest_);
 	}
-	// clear out the window with black
-	//gl::clear( Color( 1, 1, 1 ) ); 
 }
 
 CINDER_APP_BASIC( HW04_ruebusjwVer2App, RendererGl )
