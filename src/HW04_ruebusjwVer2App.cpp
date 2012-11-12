@@ -26,14 +26,20 @@ class HW04_ruebusjwVer2App : public AppBasic {
   public:
 	void setup();
 	void mouseDown( MouseEvent event );	
+	void keyDown( KeyEvent event );
 	void update();
 	void draw();
 	void shapeDrawer(float x_, float y_, int red, int green, int blue, bool isLookingForClosest);
 	void prepareSettings(Settings* settings);
+	int* makePopulationArrays(int censusArrLength, Census* censusArr, int starbucksArrLen, Entry* starbucksArr);
 
 	Entry* e;
 	Census* c_;
 	Census* c_2010;
+
+	int* population2000;
+	int* population2010;
+	int* populationDiff;
 
 	Entry* closestStar;
 	int arrLen;
@@ -41,7 +47,15 @@ class HW04_ruebusjwVer2App : public AppBasic {
 	int censusArrLen2010;
 	bool growCalled;
 	bool isLookingForClosest_;
-	node* root;
+
+	int showPPS_2000;
+	int showPPS_2010;
+	int showDif;
+
+	bool inhibited;
+	bool inhibited2;
+	bool inhibited3;
+
 	static const int appWidth = 800;
 	static const int appHeight = 600;
 	
@@ -60,6 +74,41 @@ private:
 void HW04_ruebusjwVer2App::prepareSettings(Settings* settings){
 	settings->setWindowSize(appWidth,appHeight);
 	settings->setResizable(false);
+}
+
+int* HW04_ruebusjwVer2App::makePopulationArrays(int censusArrLength, Census* censusArr, int starbucksArrLen, Entry* starbucksArr)
+{
+	Entry entryTemp;
+	int* tempArr = new int[starbucksArrLen];
+
+	for(int i = 0; i<starbucksArrLen;i++)
+	{
+		tempArr[i] = 0;
+	}
+
+	bool bucksNotFound;
+	int counter = 0;
+	int population = 0;
+
+	for(int i = 0;i < censusArrLength; i++)
+	{
+		bucksNotFound = true;
+		counter = 0;
+		entryTemp = *rs.getNearest(censusArr[i].x, censusArr[i].y);
+		while(bucksNotFound)
+		{
+			if(entryTemp.x == starbucksArr[counter].x && entryTemp.y == starbucksArr[counter].y)
+			{
+				tempArr[counter]=tempArr[counter]+censusArr[i].population;
+				bucksNotFound = false;
+			}
+			else
+			{
+				counter++;
+			}
+		}
+	}
+	return tempArr;
 }
 
 Entry* grow(Entry* smallArray, int arrayLen){
@@ -84,6 +133,13 @@ Census* grow(Census* smallArray, int arrayLen){
 
 void HW04_ruebusjwVer2App::setup()
 {
+	showPPS_2000 = 1;
+	showPPS_2010 = 1;
+	showDif=1;
+	inhibited = true;
+	inhibited2 = true;
+	inhibited3 = true;
+
 	myImage = gl::Texture( loadImage( loadAsset( "USA01.PNG" ) ) );
 	isLookingForClosest_ = false;
 
@@ -232,7 +288,7 @@ void HW04_ruebusjwVer2App::setup()
 		else{}
 	}	
 	censusArrLen2010 = censusCounter2010+1;
-	in2.close();
+	in3.close();
 
 
 	//shuffle algorithm
@@ -254,6 +310,17 @@ void HW04_ruebusjwVer2App::setup()
 
 	
 	rs.build(e,arrLen);
+	population2000 = makePopulationArrays(censusArrLen, c_, arrLen, e);
+	population2010 = makePopulationArrays(censusArrLen2010, c_2010, arrLen, e);
+	populationDiff = new int[arrLen];
+	for(int i = 0; i < arrLen; i++)
+	{
+		populationDiff[i] = population2010[i]-population2000[i];
+	}
+	for(int i = 0; i< arrLen;i++)
+	{
+	console() << populationDiff[i]<< endl;
+	}
 	//closestStar = rs.getNearest(.2, .6);
 	//console() <<"Your closest Starbucks is at: " << closestStar->identifier << std::endl;
 }
@@ -277,6 +344,27 @@ void HW04_ruebusjwVer2App::shapeDrawer(float x_, float y_, int red, int green, i
 		gl::drawSolidCircle( Vec2f( 800*x_, 600*(1-y_) ), 2.0f );
 		gl::color(1,1,1,-1);
 	}
+	
+}
+
+void HW04_ruebusjwVer2App::keyDown( KeyEvent event )
+{
+	if(event.getChar() == 'q')
+	{
+		showPPS_2000++;
+		inhibited = !inhibited;
+	}
+	if(event.getChar() == 'w')
+	{
+		showPPS_2010++;
+		inhibited2 = !inhibited2;
+	}
+	if(event.getChar()=='e')
+	{
+		showDif++;
+		inhibited3 = !inhibited3;
+	}
+
 }
 
 void HW04_ruebusjwVer2App::mouseDown( MouseEvent event )
@@ -294,13 +382,13 @@ void HW04_ruebusjwVer2App::mouseDown( MouseEvent event )
 
 void HW04_ruebusjwVer2App::update()
 {
-	
 
+	frameNumber++;
 }
 
 void HW04_ruebusjwVer2App::draw()
 {
-	if(frameNumber == 0)
+	if(frameNumber == 1 && showPPS_2000%2!=0 || frameNumber == 1 && showPPS_2010%2!=0)
 	{
 		gl::draw( myImage, getWindowBounds() );
 	}
@@ -310,8 +398,124 @@ void HW04_ruebusjwVer2App::draw()
 		{
 			isLookingForClosest_ = true;
 		}
-
 		shapeDrawer(e[i].x,e[i].y,255,0,0,isLookingForClosest_);
+
+		if(showPPS_2000%2==0)
+		{
+			if(!inhibited)
+			{
+				gl::enableAlphaBlending();
+				if(population2000[i] < 4999)
+				{
+					gl::color(ColorA(0,0,1,.07));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 25.0f );
+				}
+				else if(population2000[i] > 5000 && population2000[i] < 9999)
+				{
+					gl::color(ColorA(0,1,1,.10));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 20.0f );
+				}
+				else if(population2000[i] > 10000 && population2000[i] < 19999)
+				{
+					gl::color(ColorA(0,1,0,.25));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 15.0f );
+				}
+				else if(population2000[i] > 20000 && population2000[i] < 49999)
+				{
+					gl::color(ColorA(.5,1,0,.5));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 10.0f );
+				}
+				else if(population2000[i] > 50000 && population2000[i] < 99999)
+				{
+					gl::color(ColorA(1,1,0,.65));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 8.0f );
+				}
+				else if(population2000[i] > 100000 && population2000[i] < 199999)
+				{
+					gl::color(ColorA(1,.5,0,.85));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 7.0f );
+				}
+				else
+				{
+					gl::color(ColorA(1,0,0,.95));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 6.0f );
+				}
+			}
+		}
+		else if(showPPS_2010%2==0)
+		{
+			if(!inhibited2)
+			{
+				gl::enableAlphaBlending();
+				if(population2010[i] < 4999)
+				{
+					gl::color(ColorA(0,0,1,.07));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 25.0f );
+				}
+				else if(population2010[i] > 5000 && population2010[i] < 9999)
+				{
+					gl::color(ColorA(0,1,1,.10));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 20.0f );
+				}
+				else if(population2010[i] > 10000 && population2010[i] < 19999)
+				{
+					gl::color(ColorA(0,1,0,.25));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 15.0f );
+				}
+				else if(population2010[i] > 20000 && population2010[i] < 49999)
+				{
+					gl::color(ColorA(.5,1,0,.5));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 10.0f );
+				}
+				else if(population2010[i] > 50000 && population2010[i] < 99999)
+				{
+					gl::color(ColorA(1,1,0,.65));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 8.0f );
+				}
+				else if(population2010[i] > 100000 && population2010[i] < 199999)
+				{
+					gl::color(ColorA(1,.5,0,.85));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 7.0f );
+				}
+				else
+				{
+					gl::color(ColorA(1,0,0,.95));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 6.0f );
+				}
+			}
+		}
+		else if(showDif%2==0)
+		{
+			if(!inhibited3)
+			{
+				gl::enableAlphaBlending();
+				if(populationDiff[i] < -5000)
+				{
+					gl::color(ColorA(1,0,0,.5));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 10.0f );
+				}
+				else if(populationDiff[i] > -4999 && populationDiff[i] < 0)
+				{
+					gl::color(ColorA(1,.5,0,.5));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 10.0f );
+				}
+				else if(populationDiff[i] >=0 && populationDiff[i] < 10000)
+				{
+					gl::color(ColorA(1,1,0,.5));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 10.0f );
+				}
+				else if(populationDiff[i] >= 10000)
+				{
+					gl::color(ColorA(0,1,0,.5));
+					gl::drawSolidCircle( Vec2f( 800*e[i].x, 600*(1-e[i].y) ), 10.0f );
+				}
+			}
+		}
+		else
+		{
+			frameNumber=0;
+			gl::disableAlphaBlending();
+		}	
 	}
 }
 
