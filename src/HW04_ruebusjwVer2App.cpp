@@ -30,14 +30,21 @@ class HW04_ruebusjwVer2App : public AppBasic {
 	void draw();
 	void shapeDrawer(float x_, float y_, int red, int green, int blue, bool isLookingForClosest);
 	void prepareSettings(Settings* settings);
+
 	Entry* e;
+	Census* c_;
+	Census* c_2010;
+
 	Entry* closestStar;
 	int arrLen;
+	int censusArrLen;
+	int censusArrLen2010;
 	bool growCalled;
 	bool isLookingForClosest_;
 	node* root;
 	static const int appWidth = 800;
 	static const int appHeight = 600;
+	
 private:
 	gl::Texture myImage;
 	ruebusjwStarbucks rs;
@@ -65,6 +72,16 @@ Entry* grow(Entry* smallArray, int arrayLen){
 	return newArray;
 }
 
+Census* grow(Census* smallArray, int arrayLen){
+	Census* newArray = new Census[arrayLen*2];
+	for(int i = 0; i < arrayLen; i++)
+	{
+		newArray[i] = smallArray[i];
+	}
+	
+	return newArray;
+}
+
 void HW04_ruebusjwVer2App::setup()
 {
 	myImage = gl::Texture( loadImage( loadAsset( "USA01.PNG" ) ) );
@@ -74,10 +91,21 @@ void HW04_ruebusjwVer2App::setup()
 	yPos = -1;
 	
 	growCalled = false;
+
 	arrLen = 3000;
+	censusArrLen = 5000;
+	censusArrLen2010 = 5000;
+
 	int counter = 0;
+	int censusCounter = 0;
+	int censusCounter2010 = 0;
+
 	frameNumber = 0;
+
 	e = new Entry[arrLen];
+	c_ = new Census[censusArrLen];
+	c_2010 = new Census[censusArrLen2010];
+
 	ifstream in("../resources/Starbucks_2006.csv");
 
 	
@@ -123,6 +151,89 @@ void HW04_ruebusjwVer2App::setup()
 		else{}
 	}	
 	arrLen = counter+1;
+	in.close();
+
+	ifstream in2("../resources/Census_2000.csv");
+
+	while(!in2.eof())
+	{
+		if(censusCounter == censusArrLen)
+		{
+			c_ = grow(c_, censusArrLen);
+			growCalled = true;
+		}
+		int population_;
+		double x_;
+		double y_;
+		string line;
+		getline(in2,line,',');
+		in2.get();
+		getline(in2,line,',');
+		in2.get();
+		getline(in2,line,',');
+		in2.get();
+		getline(in2,line,',');
+		in2>>population_;
+		getline(in2,line,',');
+		in2>>x_;
+		getline(in2,line,',');
+		in2>>y_;
+		getline(in2,line,'\r');
+		
+		c_[censusCounter].population=population_;
+		c_[censusCounter].x=x_;
+		c_[censusCounter].y=y_; 
+		censusCounter++;
+		if(growCalled){
+			censusArrLen = censusArrLen*2;
+			growCalled = false;
+		}
+		else{}
+	}	
+	censusArrLen = censusCounter+1;
+	in2.close();
+
+
+	ifstream in3("../resources/Census_2010.csv");
+
+	while(!in3.eof())
+	{
+		if(censusCounter2010 == censusArrLen2010)
+		{
+			c_2010 = grow(c_2010, censusArrLen2010);
+			growCalled = true;
+		}
+		int population_;
+		double x_;
+		double y_;
+		string line;
+		getline(in3,line,',');
+		in3.get();
+		getline(in3,line,',');
+		in3.get();
+		getline(in3,line,',');
+		in3.get();
+		getline(in3,line,',');
+		in3>>population_;
+		getline(in3,line,',');
+		in3>>x_;
+		getline(in3,line,',');
+		in3>>y_;
+		getline(in3,line,'\r');
+		
+		c_2010[censusCounter2010].population=population_;
+		c_2010[censusCounter2010].x=x_;
+		c_2010[censusCounter2010].y=y_; 
+		censusCounter2010++;
+		if(growCalled){
+			censusArrLen2010 = censusArrLen2010*2;
+			growCalled = false;
+		}
+		else{}
+	}	
+	censusArrLen2010 = censusCounter2010+1;
+	in2.close();
+
 
 	//shuffle algorithm
 	int j = 0;

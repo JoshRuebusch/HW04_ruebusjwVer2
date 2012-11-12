@@ -12,14 +12,14 @@ node::node(Entry e){
 }
 
 ruebusjwStarbucks::ruebusjwStarbucks(){}
-
+/*
 node* insert(Entry e, node* r, bool isXlevel){
 	//case 1: no node found
 	if(r->data==NULL)
 		return new node(e);
 	//case 2: same node...this one shouldn't happen, I don't think
 	/*if(r->data->x == e.x && r->data->y == e.y)
-		return r;*/
+		return r;
 	//case 3 on x level, key's x < node's x
 	if(e.x < r->data->x && isXlevel)
 		r->left_=insert(e,r->left_,!isXlevel);
@@ -34,7 +34,7 @@ node* insert(Entry e, node* r, bool isXlevel){
 		r->right_=insert(e,r->right_,!isXlevel);
 
 }
-
+*/
 void ruebusjwStarbucks::build(Entry* c, int n){
 	bool isXLevel = true;
 	arraySize = n;
@@ -67,7 +67,7 @@ Entry* ruebusjwStarbucks::getNearest(double x_, double y_){
 	
 	return curPosition;
 }
-
+/*
 Entry* search(double keyX_, double keyY_, node* r, bool isXLevel){
 	if(r==NULL) return NULL;
 	if(keyX_ == r->data->x && keyY_ == r->data->y)
@@ -82,6 +82,6 @@ Entry* search(double keyX_, double keyY_, node* r, bool isXLevel){
 	else
 		Entry* best_fit = search(keyX_, keyY_, r->right_,!isXLevel);
 }
-
+*/
 
 

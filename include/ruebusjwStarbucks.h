@@ -22,6 +22,25 @@ public:
 	Entry* data;		
    }; 
 
+class Census{
+public:
+	int population;
+	double x;
+	double y;
+};
+
+class Censys2010{
+public:
+	int stateID_2;
+	int countryID_2;
+	int censusID_2;
+	int blockGroupID_2;
+	int population_2;
+	double x_2;
+	double y_2;
+};
+
+
 class ruebusjwStarbucks : public Starbucks{
 public:
 	Entry* entArr;
